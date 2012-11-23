@@ -6,7 +6,6 @@ entries = Blueprint('entries', __name__, template_folder='templates')
 
 @entries.route('/')
 def list():
-    print current_user
     entries = g.mongo.entries.find()
     return render_template('show_entries.html', entries=entries)
 

@@ -5,7 +5,7 @@ from contextlib import closing
 from flask import Flask, request, session, g, redirect, url_for, abort,\
         render_template, flash, app
 from flask.ext.login import LoginManager, login_user, logout_user, current_user
-from flask.ext.pymongo import PyMongo
+from flask.ext.pymongo import PyMongo, ObjectId
 
 from flaskr import config
 from flaskr.blueprints.entries import entries
@@ -21,7 +21,9 @@ login_manager.setup_app(app)
 
 @login_manager.user_loader
 def load_user(userid):
-    return g.mongo.users.find_one({ 'username': userid })
+    db_user = mongo.db.users.find_one({ '_id': ObjectId(str(userid)) })
+    user = User(username=db_user.get('username'), id=db_user.get('_id'))
+    return user
 
 app.register_blueprint(entries)
 
@@ -34,23 +36,20 @@ def login():
     error = None
     if request.method == 'POST':
         db_user = g.mongo.users.find_one({ 'username': request.form['username'] })
-        print db_user
         if not db_user:
             error = 'Invalid username'
         elif request.form['password'] != db_user.get('password', ''):
             error = 'Invalid password'
         else:
-            user = User(db_user.get('username'), db_user.get('_id'))
+            user = User(username=db_user.get('username'), id=db_user.get('_id'))
             login_user(user)
-            print user.is_authenticated()
-            print current_user
             flash('You are logged in')
             return redirect(url_for('entries.list'))
     return render_template('login.html', error=error)
 
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
+    logout_user()
     flash('You are logged out')
     return redirect(url_for('entries.list'))
 
