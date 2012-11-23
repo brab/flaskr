@@ -1,0 +1,25 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+<h2>
+  The User Admin View
+</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>username</th>
+      <th>email</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for user in users %}
+  <tr>
+    <td>{{ user.get_id() }}</td>
+    <td>{{ user.username }}</td>
+    <td>{{ user.email }}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
